@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# start python web server
+# make sure port 8000 is open
+
+python -m http.server &
+WEB_SERVER_PID=$#
+
+sudo virt-install \
+     --name=osp-13 \
+     --nographics \
+     --sound=none \
+     --console pty,target_type=serial  \
+     --vcpus=2 \
+     --ram=10240 \
+     --disk size=100,sparse=no \
+     --extra-args "console=ttyS0 ip=192.168.1.81::192.168.1.1:255.255.255.0:director.lab.lamourine.org:eth0:none ks=http://192.168.1.100:8000/vm-anaconda-ks.cfg" \
+     --os-type=linux \
+     --os-variant=rhel7.8 \
+     --location=/home/libvirt/images/rhel-server-7.8-x86_64-dvd.iso \
+     --network bridge:br-ext \
+     --network bridge:br-ipmi \
+     --network bridge:br-prov \
+     --network bridge:br-data
+
+kill ${WEB_SERVER_PID}
+
