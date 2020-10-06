@@ -1,2 +1,5 @@
 # Ignore emacs backup files
 *~
+
+# Ignore any files with "credentials" in the name
+*_credentials.*
