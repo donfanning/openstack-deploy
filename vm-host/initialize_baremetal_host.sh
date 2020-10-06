@@ -17,7 +17,12 @@
 # ** install boot DVD ISO
 #
 
+: ${RHEL_CREDS_FILE=~/.rhel_credentials.sh}
+[ -r ${RHEL_CREDS_FILE} ] && source ${RHEL_CREDS_FILE}
+
 function main() {
+
+    if 
     enable_serial_login 1
     enable_serial_console 1
     subscribe_system
@@ -44,10 +49,10 @@ function subscribe_system() {
     fi
 
     subscription-manager register \
-        --username rs-rackosp \
-        --password BCYICYSg7IzvJeOi7YgOgKd
+        --username "${RHEL_CREDS[USERNAME]}" \
+        --password "${RHEL_CREDS[PASSWORD]}"
     subscription-manager attach \
-        --pool 8a85f99b71a877770171ce20c3a2127e
+        --pool "${RHEL_CREDS[POOLID]}"
 }
 
 
