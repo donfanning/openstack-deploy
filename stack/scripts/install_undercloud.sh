@@ -1,9 +1,14 @@
+#!/bin/bash
 #
+# Install and configure the undercloud on a host
 #
-#
-RH_CONTAINER_REPO_USERNAME=rs-rackosp
-RH_CONTAINER_REPO_PASSWORD=BCYICYSg7IzvJeOi7YgOgKd
+set -u # Exit for undefined variables
 
+# Credentials shouldn't be saved in a file on github
+# Source them locally to fill them in for the scripts
+#
+: ${RHEL_CREDS_FILE=~/.rhel_credentials.sh}
+[ -r ${RHEL_CREDS_FILE} ] && source ${RHEL_CREDS_FILE}
 
 function main() {
 
@@ -76,7 +81,7 @@ function import_container_images() {
 ContainerImageRegistryLogin: true
 ContainerImageRegistryCredentials:
   registry.access.redhat.com:
-    ${RH_CONTAINER_REPO_USERNAME}: ${RH_CONTAINER_REPO_PASSWORD}
+    ${RHEL_CREDS[USERNAME]}: ${RHEL_CREDS[PASSWORD]}
 EOF
 
     cat ~/container_image_registry_login.yaml \
@@ -84,8 +89,8 @@ EOF
         > ~/local_registry_images.yaml
 
     sudo docker login \
-         --username ${RH_CONTAINER_REPO_USERNAME} \
-         --password ${RH_CONTAINER_REPO_PASSWORD} \
+         --username "${RHEL_CREDS[USERNAME]}" \
+         --password "${RHEL_CREDS[PASSWORD]}" \
          registry.access.redhat.com
 
     sudo openstack overcloud container image upload \
