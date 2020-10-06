@@ -14,6 +14,7 @@ main() {
     create_ca_private_key
     self_sign_ca_certificate
     create_undercloud_sign_request
+    sign_undercloud_certificate
     install_ca_cert
     create_trust_file
 }
@@ -68,7 +69,7 @@ function create_undercloud_sign_request() {
             -out ${SSLDIR}/undercloud-req.pem
 }
 
-function sigh_undercloud_certificate() {
+function sign_undercloud_certificate() {
     openssl rsa -in ${SSLDIR}/undercloud.key -out ${SSLDIR}/undercloud.key
     openssl x509 \
             -req \

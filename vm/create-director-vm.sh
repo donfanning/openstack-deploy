@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+DATA_DIR=$(dirname $0)
+
 # start python web server
 # make sure port 8000 is open
 RHEL_VERSION=7.8
@@ -10,14 +12,23 @@ VM_NAME=osp-13
 
 PYTHON_MAJOR=$(python --version | cut -d' ' -f2 | cut -d. -f1)
 
-if [ ${PYTHON_MAJOR} -eq 2 ] ; then
-    python -m SimpleHTTPServer ${KS_PORT} &
-    HTTPD_PID=$!
-else
-    python -m http.server ${KS_PORT} &
-    HTTPD_PID=$!
-fi
-echo "HTTPD PID: ${HTTPD_PID}"
+
+function start_httpd() {
+    local data_dir=$1
+    local cwd=$(pwd)
+    
+    cd $data_dir ;
+    if [ ${PYTHON_MAJOR} -eq 2 ] ; then
+        python -m SimpleHTTPServer ${KS_PORT} &
+    else
+        python -m http.server ${KS_PORT} &
+    fi
+    cd ${cwd}
+}
+
+trap 'kill $(jobs -p)' EXIT INT HUP
+
+start_httpd ${DATA_DIR}
 
 sudo virt-install \
      --name=${VM_NAME} \
@@ -35,6 +46,4 @@ sudo virt-install \
      --network bridge:br-ipmi \
      --network bridge:br-prov \
      --network bridge:br-data
-
-kill ${HTTPD_PID}
 
