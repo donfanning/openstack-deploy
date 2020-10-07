@@ -7,8 +7,8 @@ set -u # Exit for undefined variables
 # Credentials shouldn't be saved in a file on github
 # Source them locally to fill them in for the scripts
 #
-: ${RHEL_CREDS_FILE=~/.rhel_credentials.sh}
-[ -r ${RHEL_CREDS_FILE} ] && source ${RHEL_CREDS_FILE}
+: ${SM_FILE=~/.rhel_credentials.sh}
+[ -r ${SM_FILE} ] && source ${SM_FILE}
 
 function main() {
 
@@ -81,7 +81,7 @@ function import_container_images() {
 ContainerImageRegistryLogin: true
 ContainerImageRegistryCredentials:
   registry.access.redhat.com:
-    ${RHEL_CREDS[USERNAME]}: ${RHEL_CREDS[PASSWORD]}
+    ${SM[USERNAME]}: ${SM[PASSWORD]}
 EOF
 
     cat ~/container_image_registry_login.yaml \
@@ -89,8 +89,8 @@ EOF
         > ~/local_registry_images.yaml
 
     sudo docker login \
-         --username "${RHEL_CREDS[USERNAME]}" \
-         --password "${RHEL_CREDS[PASSWORD]}" \
+         --username "${SM[USERNAME]}" \
+         --password "${SM[PASSWORD]}" \
          registry.access.redhat.com
 
     sudo openstack overcloud container image upload \

@@ -17,12 +17,12 @@
 # ** install boot DVD ISO
 #
 
-: ${RHEL_CREDS_FILE=~/.rhel_credentials.sh}
-[ -r ${RHEL_CREDS_FILE} ] && source ${RHEL_CREDS_FILE}
+: ${SECRETS_FILE=openstack-secrets.json}
 
 function main() {
 
-    if 
+    [ -r ${SECRETS_FILE} ] && resolve_variables ${SECRETS_FILE}
+
     enable_serial_login 1
     enable_serial_console 1
     subscribe_system
@@ -34,6 +34,17 @@ function main() {
     enable_ip_forwarding
     create_bridge ipmi eno3
     create_bridge ctlplane eno49
+}
+
+
+function resolve_variables() {
+    local secrets_file=$1
+
+    declare -A SM
+
+    SM[USERNAME]=$(jq --raw-output .sm.username)
+    SM[PASSWORD]=$(jq --raw-output .sm.password)
+    SM[POOLID]=$(jq --raw-output .sm.pool_id)
 }
 
 function remove_network_manager() {
@@ -49,10 +60,10 @@ function subscribe_system() {
     fi
 
     subscription-manager register \
-        --username "${RHEL_CREDS[USERNAME]}" \
-        --password "${RHEL_CREDS[PASSWORD]}"
+        --username "${SM[USERNAME]}" \
+        --password "${SM[PASSWORD]}"
     subscription-manager attach \
-        --pool "${RHEL_CREDS[POOLID]}"
+        --pool "${SM[POOLID]}"
 }
 
 

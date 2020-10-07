@@ -1,17 +1,17 @@
 #!/bin/bash
 #
-DATA_DIR=$(dirname $0)
+: ${DATA_DIR=$(dirname $0)}
+: ${SECRETS_JSON=~/secrets.json}
 
 # start python web server
 # make sure port 8000 is open
-RHEL_VERSION=7.8
-KS_PORT=8080
-VM_NAME=osp-13
+: ${RHEL_VERSION=7.8}
+: ${KS_PORT=8080}
+: ${VM_NAME=osp-13}
 
 #sudo firewall-cmd --zone libvirt --add-port 8080/tcp
 
 PYTHON_MAJOR=$(python --version | cut -d' ' -f2 | cut -d. -f1)
-
 
 function start_httpd() {
     local data_dir=$1
@@ -26,7 +26,17 @@ function start_httpd() {
     cd ${cwd}
 }
 
+function generate_kickstart_file() {
+    local data_dir=$1
+    local secrets_file=$2
+    
+    jinja2 ${data_dir}/vm-anaconda-ks.cfg.j2  ${secrets_file} \
+           > ${data_dir}/vm-anaconda-ks.cfg
+}
+
 trap 'kill $(jobs -p)' EXIT INT HUP
+
+generate_kickstart_file ${DATA_DIR} ${SECRETS_JSON}
 
 start_httpd ${DATA_DIR}
 
@@ -47,3 +57,4 @@ sudo virt-install \
      --network bridge:br-prov \
      --network bridge:br-data
 
+rm ${DATA_DIR}/vm-anaconda-ks.cfg
