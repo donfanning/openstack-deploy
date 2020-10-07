@@ -1,5 +1,5 @@
 # Ignore emacs backup files
 *~
 
-# Ignore any files with "credentials" in the name
-*_credentials.*
+# Ignore the user provided secrets file
+secrets.json
